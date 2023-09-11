@@ -1,5 +1,7 @@
+import sys
+sys.path.append("../")
 import streamlit as st
-from FASTphysics.tutor import tutor
+from tutor import tutor
 
 class Interface:
     def __init__(self, tu: tutor) -> None:
