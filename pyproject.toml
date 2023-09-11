@@ -16,25 +16,11 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-    "openai",
-    "streamlit",
-    "pyinstaller",
-]
+dynamic = ["dependencies"]
 
-[tool.poetry]
-name = "FASTphysics"
-version = "0.0.1"
-description = "Friendly Awesome Smart Tutor: Physics"
-authors = ["Shubh Agrawal"]
-license = "BSD-3-Clause"
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "=3.9"
-openai = "^0.28.0"
-streamlit = "^1.26.0"
-pyinstaller = "^5.13"
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["requirements-dev.txt"] }}
 
 [project.urls]
 "Homepage" = "https://github.com/shubhagrawal30/FASTphysics"
