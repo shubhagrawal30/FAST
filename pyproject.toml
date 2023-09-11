@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "FASTphysics"
+version = "0.0.1"
+authors = [
+  { name="Shubh Agrawal", email="shubh@sas.upenn.edu" },
+]
+description = "Friendly Awesome Smart Tutor: Physics"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "openai",
+    "streamlit"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/shubhagrawal30/FASTphysics"
+"Bug Tracker" = "https://github.com/shubhagrawal30/FASTphysics/issues"
