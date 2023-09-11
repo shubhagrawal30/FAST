@@ -22,6 +22,12 @@ dependencies = [
     "pyinstaller",
 ]
 
+[tool.poetry]
+name = "FASTphysics"
+version = "0.0.1"
+description = "Friendly Awesome Smart Tutor: Physics"
+readme = "README.md"
+
 [project.urls]
 "Homepage" = "https://github.com/shubhagrawal30/FASTphysics"
 "Bug Tracker" = "https://github.com/shubhagrawal30/FASTphysics/issues"
