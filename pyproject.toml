@@ -18,7 +18,8 @@ classifiers = [
 ]
 dependencies = [
     "openai",
-    "streamlit"
+    "streamlit",
+    "pyinstaller",
 ]
 
 [project.urls]
