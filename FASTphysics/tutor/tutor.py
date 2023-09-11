@@ -1,8 +1,8 @@
 import openai
 import os
+import streamlit as st
 
-with open(os.path.join(os.path.dirname(__file__), "..", ".OPENAI-API-KEY")) as f:
-    openai.api_key = f.read().strip()
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 class Tutor():
     def __init__(self, subject):
