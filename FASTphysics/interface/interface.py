@@ -1,4 +1,4 @@
-import sys
+import sys, time
 sys.path.append("../")
 import streamlit as st
 from tutor import tutor
@@ -15,19 +15,25 @@ class Interface:
                     with st.chat_message(message["role"]):
                         st.markdown(message["content"])
 
+    def stream(self, response):
+        full_response = ""
+        
+        with st.chat_message("assistant"):
+            message = st.empty()
+            for chunk in response.split():
+                full_response += chunk + " "
+                message.markdown(full_response + "...")
+                time.sleep(0.05)
+            message.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+
     def prompt(self):
         if prompt := st.chat_input("What is up?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                full_response = ""
-                for response in self.tutor.ask(prompt):
-                    full_response += response
-                message_placeholder.markdown(full_response)
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
-
+            self.stream(self.tutor.ask(prompt))
+            
     def main(self):
         self.memory()
         self.prompt()
