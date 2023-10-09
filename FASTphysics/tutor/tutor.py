@@ -1,12 +1,14 @@
 import openai
 import os, sys
 import streamlit as st
-from . import prompts as p
+from . import prompts
 
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 class Tutor():
     def __init__(self):
+        p = prompts.Prompts()
+        self.subject = p.SUBJECT()
         self.history = [{"role": "system", "content": p.INIT_PROMPT()}]
 
     def ask(self, question):

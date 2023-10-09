@@ -1,6 +1,7 @@
 # file where we read and store all the prompts to OpenAI
 
 import json
+import streamlit as st
 from google.cloud import firestore
 from google.oauth2 import service_account
 
@@ -18,13 +19,13 @@ class Prompts:
         self.doc = doc_ref.get()
         
     def SUBJECT(self):
-        if self.doc.exists:
+        try:
             return self.doc.get("subject")
-        else:
+        except:
             return DEFAULT_SUBJECT
     
     def INIT_PROMPT(self):
-        if self.doc.exists:
+        try:
             return self.doc.get("init")
-        else:
+        except:
             return DEFAULT_INITP(self.SUBJECT())

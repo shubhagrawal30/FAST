@@ -20,10 +20,10 @@ if __name__ == "__main__":
     # load current values from the database
     doc_ref = db.collection(collection_name).document(document_name)
     doc = doc_ref.get()
-    if doc.exists:
+    try:
         subject = doc.get(subject_field_name)
         initp = doc.get(initp_field_name)
-    else:
+    except:
         subject = DEFAULT_SUBJECT
         initp = DEFAULT_INITP(subject)
     

@@ -10,7 +10,7 @@ class Interface:
             st.session_state.messages = []
 
     def memory(self):
-        st.title(f"Welcome to FAST{self.tutor.SUBJECT()}!")
+        st.title(f"Welcome to FAST{self.tutor.subject}!")
         for message in st.session_state.messages:
                     with st.chat_message(message["role"]):
                         st.markdown(message["content"])
