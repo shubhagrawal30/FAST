@@ -21,17 +21,19 @@ if __name__ == "__main__":
     doc_ref = db.collection(collection_name).document(document_name)
     doc = doc_ref.get()
     try:
-        subject = doc.get(subject_field_name)
-        initp = doc.get(initp_field_name)
+        st.session_state.subject = doc.get(subject_field_name)
+        st.session_state.initp = doc.get(initp_field_name)
     except:
-        subject = DEFAULT_SUBJECT
-        initp = DEFAULT_INITP(subject)
+        st.session_state.subject = DEFAULT_SUBJECT
+        st.session_state.initp = DEFAULT_INITP(st.session_state.subject)
     
-    st.title("FASTphysics Admin")
+    st.title("FAST Admin")
+    st.text("Remember to reload the student page after reconfiguration.")
+    
     # entry box for the subject
-    subject = st.text_input("Subject", subject)
-    # entry box for the initialization prompt
-    initp = st.text_input("Prompt", initp)
+    subject = st.text_input("Subject", st.session_state.subject, key="subject-box")
+    # entry box for the initialization prompt, box is multiline and bigger
+    initp = st.text_area("Prompt", st.session_state.initp, height=200, key="initp-box")
     
     # set up the inputs in the database
     doc_ref = db.collection(collection_name).document(document_name)
@@ -40,3 +42,17 @@ if __name__ == "__main__":
         doc_ref.update({subject_field_name: subject, initp_field_name: initp})
     else:
         doc_ref.set({subject_field_name: subject, initp_field_name: initp})
+        
+    # a reset-to-default button
+    if st.button("Reset to Default"):
+        doc_ref.update({subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT)})
+        st.session_state.subject = DEFAULT_SUBJECT
+        st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
+        
+    # show current settings
+    doc_ref = db.collection(collection_name).document(document_name)
+    doc = doc_ref.get()
+    st.header("Current settings:")
+    st.write(f"Subject: {doc.get(subject_field_name)}")
+    st.write(f"Prompt: {doc.get(initp_field_name)}")
+    
