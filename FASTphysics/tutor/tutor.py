@@ -6,9 +6,8 @@ from . import prompts as p
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 class Tutor():
-    def __init__(self, subject):
-        self.subject = subject
-        self.history = [{"role": "system", "content": p.INIT_TUTOR(subject)}]
+    def __init__(self):
+        self.history = [{"role": "system", "content": p.INIT_PROMPT()}]
 
     def ask(self, question):
         question = {"role": "user", "content": question}

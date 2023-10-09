@@ -9,6 +9,9 @@ import json
 collection_name, document_name = "prompts", "demo"
 subject_field_name, initp_field_name = "subject", "init"
 
+DEFAULT_SUBJECT = "physics"
+DEFAULT_INITP = lambda subject: f"You are a Friendly Awesome Smart Tutor for {subject}!"
+
 if __name__ == "__main__":
     firestore_key = json.loads(st.secrets["FIRESTORE_KEY"])
     creds = service_account.Credentials.from_service_account_info(firestore_key)
@@ -21,8 +24,8 @@ if __name__ == "__main__":
         subject = doc.get(subject_field_name)
         initp = doc.get(initp_field_name)
     else:
-        subject = "physics"
-        initp = "You are a Friendly Awesome Smart Tutor for physics!"
+        subject = DEFAULT_SUBJECT
+        initp = DEFAULT_INITP(subject)
     
     st.title("FASTphysics Admin")
     # entry box for the subject
