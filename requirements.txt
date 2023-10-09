@@ -1,3 +1,5 @@
 openai
 streamlit
 pyinstaller
+google-cloud-firestore
+google-auth-oauthlib
