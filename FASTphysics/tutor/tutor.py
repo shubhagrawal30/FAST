@@ -9,8 +9,8 @@ class Tutor():
     def __init__(self):
         p = prompts.Prompts()
         self.subject = p.SUBJECT()
-        self.history = [{"role": "system", "content": p.INIT_PROMPT()}]
-
+        self.history = [{"role": "system", "content": p.INIT_PROMPT()}, \
+                        {"role": "user", "content": p.FIRST_PROMPT()}]
     def ask(self, question):
         question = {"role": "user", "content": question}
         self.history.append(question)

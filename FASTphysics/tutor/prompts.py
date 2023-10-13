@@ -7,6 +7,8 @@ from google.oauth2 import service_account
 
 DEFAULT_SUBJECT = "physics"
 DEFAULT_INITP = lambda subject: f"You are a Friendly Awesome Smart Tutor for {subject}!"
+DEFAULT_FIRSTP = lambda subject: \
+    f"Hey there, my tutor for {subject}! I am the student and here to learn more about {subject}!"
 
 class Prompts:
     def __init__(self) -> None:
@@ -29,3 +31,9 @@ class Prompts:
             return self.doc.get("init")
         except:
             return DEFAULT_INITP(self.SUBJECT())
+    
+    def FIRST_PROMPT(self):
+        try:
+            return self.doc.get("first")
+        except:
+            return DEFAULT_FIRSTP(self.SUBJECT())
