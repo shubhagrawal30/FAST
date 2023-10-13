@@ -15,7 +15,7 @@ class Tutor():
         question = {"role": "user", "content": question}
         self.history.append(question)
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=self.history,
         )
         self.history.append({"role": "assistant", \
