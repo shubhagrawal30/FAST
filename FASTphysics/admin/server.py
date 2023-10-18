@@ -6,13 +6,17 @@ from google.cloud import firestore
 from google.oauth2 import service_account
 import json
 
-collection_name, document_name = "prompts", "demo"
+collection_name, document_name = "prompts", "active"
 subject_field_name, initp_field_name, firstp_field_name = "subject", "init", "first"
 
 DEFAULT_SUBJECT = "physics"
 DEFAULT_INITP = lambda subject: f"You are a Friendly Awesome Smart Tutor for {subject}!"
 DEFAULT_FIRSTP = lambda subject: \
     f"Hey there, my tutor for {subject}! I am the student and here to learn more about {subject}!"
+
+# list of buttons that admin can set values to
+set_to_buttons_doc_names = ["astro-demo", "physics-demo"]
+button_text_field_name = "button_text"
 
 if __name__ == "__main__":
     firestore_key = json.loads(st.secrets["FIRESTORE_KEY"])
@@ -57,6 +61,25 @@ if __name__ == "__main__":
         st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
         st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
         
+    # several buttons that set the values to some preset values
+    for button_doc_name in set_to_buttons_doc_names:
+        if 1:
+            doc_ref = db.collection(collection_name).document(button_doc_name)
+            doc = doc_ref.get()
+            button_text = doc.get(button_text_field_name)
+            
+            if st.button(f"Set to {button_text}"):
+                st.session_state.subject = doc.get(subject_field_name)
+                st.session_state.initp = doc.get(initp_field_name)
+                st.session_state.firstp = doc.get(firstp_field_name)
+                # update active document
+                doc_ref = db.collection(collection_name).document(document_name)
+                doc = doc_ref.get()
+                doc_ref.update({subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
+                    firstp_field_name: st.session_state.firstp})
+        # except:
+        #     print(f"Error in setting to {button_doc_name}.")
+
     # show current settings
     doc_ref = db.collection(collection_name).document(document_name)
     doc = doc_ref.get()
