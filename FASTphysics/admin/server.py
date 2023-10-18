@@ -38,6 +38,41 @@ if __name__ == "__main__":
     st.title("FAST Admin")
     st.text("Remember to reload the student page after reconfiguration.")
     
+    # show current settings
+    doc_ref = db.collection(collection_name).document(document_name)
+    doc = doc_ref.get()
+    st.header("Current settings:")
+    st.write(f"Subject: {doc.get(subject_field_name)}")
+    st.write(f"Prompt: {doc.get(initp_field_name)}")
+    st.write(f"First Student Input: {doc.get(firstp_field_name)}")
+        
+    # several buttons that set the values to some preset values
+    for button_doc_name in set_to_buttons_doc_names:
+        try:
+            doc_ref = db.collection(collection_name).document(button_doc_name)
+            doc = doc_ref.get()
+            button_text = doc.get(button_text_field_name)
+            
+            if st.button(f"Set to {button_text}"):
+                st.session_state.subject = doc.get(subject_field_name)
+                st.session_state.initp = doc.get(initp_field_name)
+                st.session_state.firstp = doc.get(firstp_field_name)
+                # update active document
+                doc_ref = db.collection(collection_name).document(document_name)
+                doc = doc_ref.get()
+                doc_ref.update({subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
+                    firstp_field_name: st.session_state.firstp})
+        except:
+            print(f"Error in setting to {button_doc_name}.")
+        
+    # a reset-to-default button
+    if st.button("Reset to Default"):
+        doc_ref.update({subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
+            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
+        st.session_state.subject = DEFAULT_SUBJECT
+        st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
+        st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
+
     # entry box for the subject
     subject = st.text_input("Subject", st.session_state.subject, key="subject-box")
     # entry box for the initialization prompt, box is multiline and bigger
@@ -52,39 +87,3 @@ if __name__ == "__main__":
         doc_ref.update({subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
     else:
         doc_ref.set({subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
-        
-    # a reset-to-default button
-    if st.button("Reset to Default"):
-        doc_ref.update({subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
-            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
-        st.session_state.subject = DEFAULT_SUBJECT
-        st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
-        st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
-        
-    # several buttons that set the values to some preset values
-    for button_doc_name in set_to_buttons_doc_names:
-        if 1:
-            doc_ref = db.collection(collection_name).document(button_doc_name)
-            doc = doc_ref.get()
-            button_text = doc.get(button_text_field_name)
-            
-            if st.button(f"Set to {button_text}"):
-                st.session_state.subject = doc.get(subject_field_name)
-                st.session_state.initp = doc.get(initp_field_name)
-                st.session_state.firstp = doc.get(firstp_field_name)
-                # update active document
-                doc_ref = db.collection(collection_name).document(document_name)
-                doc = doc_ref.get()
-                doc_ref.update({subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
-                    firstp_field_name: st.session_state.firstp})
-        # except:
-        #     print(f"Error in setting to {button_doc_name}.")
-
-    # show current settings
-    doc_ref = db.collection(collection_name).document(document_name)
-    doc = doc_ref.get()
-    st.header("Current settings:")
-    st.write(f"Subject: {doc.get(subject_field_name)}")
-    st.write(f"Prompt: {doc.get(initp_field_name)}")
-    st.write(f"First Student Input: {doc.get(firstp_field_name)}")
-    
