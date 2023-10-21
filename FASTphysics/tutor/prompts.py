@@ -35,7 +35,7 @@ class Prompts:
             return DEFAULT_INITP(self.SUBJECT())
     
     def FIRST_PROMPT(self):
-        try:``
+        try:
             return self.doc.get("first")
         except:
             return DEFAULT_FIRSTP(self.SUBJECT())
