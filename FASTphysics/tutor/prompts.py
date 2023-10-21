@@ -5,6 +5,8 @@ import streamlit as st
 from google.cloud import firestore
 from google.oauth2 import service_account
 
+document_name = "active"
+
 DEFAULT_SUBJECT = "physics"
 DEFAULT_INITP = lambda subject: f"You are a Friendly Awesome Smart Tutor for {subject}!"
 DEFAULT_FIRSTP = lambda subject: \
@@ -17,7 +19,7 @@ class Prompts:
         creds = service_account.Credentials.from_service_account_info(firestore_key)
         self.db = firestore.Client(credentials=creds)
         
-        doc_ref = self.db.collection("prompts").document("demo")
+        doc_ref = self.db.collection("prompts").document(document_name)
         self.doc = doc_ref.get()
         
     def SUBJECT(self):
@@ -33,7 +35,7 @@ class Prompts:
             return DEFAULT_INITP(self.SUBJECT())
     
     def FIRST_PROMPT(self):
-        try:
+        try:``
             return self.doc.get("first")
         except:
             return DEFAULT_FIRSTP(self.SUBJECT())
