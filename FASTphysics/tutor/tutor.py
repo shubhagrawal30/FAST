@@ -11,13 +11,20 @@ class Tutor():
         self.subject = p.SUBJECT()
         self.history = [{"role": "system", "content": p.INIT_PROMPT()}, \
                         {"role": "user", "content": p.FIRST_PROMPT()}]
-    def ask(self, question):
+
+    def ask(self, question): # method is a generator method to allow streaming OpenAI responses
         question = {"role": "user", "content": question}
         self.history.append(question)
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=self.history,
+            stream=True
         )
-        self.history.append({"role": "assistant", \
-                             "content": response.choices[0].message.content})
-        return response.choices[0].message.content
+        collect_msgs = ""
+        for chunk in response:
+            msg = chunk['choices'][0]['delta'].get('content', '')
+            collect_msgs += msg
+            yield msg
+        
+        self.history.append({"role": "assistant", "content": collect_msgs})
+
