@@ -1,14 +1,12 @@
 # the server script for the admin side of FASTphysics
 # an app that inputs entries through streamlit forms and prints the entries
-
+import firestore as fs
 import streamlit as st
-from google.cloud import firestore
-from google.oauth2 import service_account
-import json
 
 collection_name, document_name = "prompts", "active"
 subject_field_name, initp_field_name, firstp_field_name = "subject", "init", "first"
 
+# default fall-back values
 DEFAULT_SUBJECT = "physics"
 DEFAULT_INITP = lambda subject: f"You are a Friendly Awesome Smart Tutor for {subject}!"
 DEFAULT_FIRSTP = lambda subject: \
@@ -18,14 +16,24 @@ DEFAULT_FIRSTP = lambda subject: \
 set_to_buttons_doc_names = ["astro-demo", "physics-demo"]
 button_text_field_name = "button_text"
 
+def set_to_button_click(db, button_doc_name):
+    try:
+        doc = fs.get_doc(db, collection_name, button_doc_name)
+        st.session_state.subject = doc.get(subject_field_name)
+        st.session_state.initp = doc.get(initp_field_name)
+        st.session_state.firstp = doc.get(firstp_field_name)
+        # update active document
+        fs.update_doc_dict(db, collection_name, document_name, \
+            {subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
+                firstp_field_name: st.session_state.firstp})
+    except:
+        print(f"Error in setting to {button_doc_name}.")
+
 if __name__ == "__main__":
-    firestore_key = json.loads(st.secrets["FIRESTORE_KEY"])
-    creds = service_account.Credentials.from_service_account_info(firestore_key)
-    db = firestore.Client(credentials=creds)
-    
+    db = fs.get_database()
+
     # load current values from the database
-    doc_ref = db.collection(collection_name).document(document_name)
-    doc = doc_ref.get()
+    doc = fs.get_doc(db, collection_name, document_name)
     try:
         st.session_state.subject = doc.get(subject_field_name)
         st.session_state.initp = doc.get(initp_field_name)
@@ -39,36 +47,24 @@ if __name__ == "__main__":
     st.text("Remember to reload the student page after reconfiguration.")
     
     # show current settings
-    doc_ref = db.collection(collection_name).document(document_name)
-    doc = doc_ref.get()
     st.header("Current settings:")
-    st.write(f"Subject: {doc.get(subject_field_name)}")
-    st.write(f"Prompt: {doc.get(initp_field_name)}")
-    st.write(f"First Student Input: {doc.get(firstp_field_name)}")
+    st.subheader("Subject:")
+    st.write(st.session_state.subject)
+    st.subheader("Instructions:")
+    st.write(st.session_state.initp)
+    st.subheader("First Student Input:")
+    st.write(st.session_state.firstp)
         
     # several buttons that set the values to some preset values
     for button_doc_name in set_to_buttons_doc_names:
-        try:
-            doc_ref = db.collection(collection_name).document(button_doc_name)
-            doc = doc_ref.get()
-            button_text = doc.get(button_text_field_name)
-            
-            if st.button(f"Set to {button_text}"):
-                st.session_state.subject = doc.get(subject_field_name)
-                st.session_state.initp = doc.get(initp_field_name)
-                st.session_state.firstp = doc.get(firstp_field_name)
-                # update active document
-                doc_ref = db.collection(collection_name).document(document_name)
-                doc = doc_ref.get()
-                doc_ref.update({subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
-                    firstp_field_name: st.session_state.firstp})
-        except:
-            print(f"Error in setting to {button_doc_name}.")
+        button_text = fs.get_doc(db, collection_name, button_doc_name).get(button_text_field_name)
+        st.button(f"Set to {button_text}", on_click=set_to_button_click, args=(db, button_doc_name))
         
     # a reset-to-default button
     if st.button("Reset to Default"):
-        doc_ref.update({subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
-            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
+        fs.update_doc_dict(db, collection_name, document_name, \
+            {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
+                firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
         st.session_state.subject = DEFAULT_SUBJECT
         st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
         st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
@@ -81,9 +77,12 @@ if __name__ == "__main__":
     firstp = st.text_area("First Student Input", st.session_state.firstp, height=200, key="firstp-box")
     
     # set up the inputs in the database
-    doc_ref = db.collection(collection_name).document(document_name)
-    doc = doc_ref.get()
+    doc = fs.get_doc(db, collection_name, document_name)
     if doc.exists:
-        doc_ref.update({subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
+        fs.update_doc_dict(db, collection_name, document_name, \
+            {subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
+        st.session_state.subject, st.session_state.initp, st.session_state.firstp = subject, initp, firstp
     else:
-        doc_ref.set({subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
+        fs.set_doc_dict(db, collection_name, document_name, \
+            {subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
+        st.session_state.subject, st.session_state.initp, st.session_state.firstp = subject, initp, firstp
