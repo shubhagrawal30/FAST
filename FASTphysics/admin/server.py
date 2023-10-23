@@ -129,7 +129,8 @@ if __name__ == "__main__":
         # make entry boxes for the settings
         for text, fn, ht in zip(["Subject:", "Instructions:", "First Student Input:"], \
                             ["subject", "initp", "firstp"], [3, 200, 200]):
-            st.text_area(text, st.session_state[fn], height=ht, key=f"{fn}-box", \
+            func = st.text_area if fn != "subject" else st.text_input
+            func(text, st.session_state[fn], height=ht, key=f"{fn}-box", \
                 on_change=update_text_area, args=(fn, db, collection_name, document_name))
     
     add_logo_and_credits()

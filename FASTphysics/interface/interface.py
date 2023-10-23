@@ -25,6 +25,7 @@ class Interface:
         logo_path = os.path.join(os.path.dirname(__file__), "../assets/penn_logo.png")
         sb.image(logo_path, width=250)
         sb.caption(f"Student Page @ [{info.student_page_url.split('//')[1]}](%s)" % info.student_page_url)
+        sb.caption(f"Teacher Page @ [{info.admin_page_url.split('//')[1]}](%s)" % info.admin_page_url)
         sb.caption("© 2023, S.A. for the FAST team. All rights reserved.")
         sb.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
 
