@@ -1,11 +1,11 @@
-import sys, time
+import sys, time, os
 sys.path.append("../")
 import streamlit as st
 from streamlit_extras.colored_header import colored_header
 st.set_page_config(layout="wide")
 
 from tutor import tutor
-from utils.info import *
+from utils import info
 
 class Interface:
     def __init__(self, tu: tutor) -> None:
@@ -22,8 +22,9 @@ class Interface:
         # add Penn logo and credits
         sb.markdown("----")
         sb.markdown("----")
-        sb.image("./assets/penn_logo.png", width=250)
-        sb.caption(f"Student Page @ [{student_page_url.split('//')[1]}](%s)" % student_page_url)
+        logo_path = os.path.join(os.path.dirname(__file__), "../assets/penn_logo.png")
+        sb.image(logo_path, width=250)
+        sb.caption(f"Student Page @ [{info.student_page_url.split('//')[1]}](%s)" % info.student_page_url)
         sb.caption("© 2023, S.A. for the FAST team. All rights reserved.")
         sb.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
 

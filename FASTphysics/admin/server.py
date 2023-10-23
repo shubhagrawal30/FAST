@@ -1,6 +1,6 @@
 # the server script for the admin side of FASTphysics
 # an app that inputs entries through streamlit forms and prints the entries
-import sys, re
+import sys, re, os
 sys.path.append("../")
 from utils.info import *
 
@@ -43,7 +43,8 @@ def add_logo_and_credits():
     st.markdown("----")
     # add Penn logo and credits
     _, col, _, bcol = st.columns([4, 1, 2, 3])
-    col.image("../assets/penn_logo.png", width=250)
+    logo_path = os.path.join(os.path.dirname(__file__), "../assets/penn_logo.png")
+    col.image(logo_path, width=250)
     with bcol:
         badge("github", "shubhagrawal30/FASTphysics")
         mention("shubhagrawal30/FASTphysics", icon="github", url="https://github.com/shubhagrawal30/FASTphysics")
