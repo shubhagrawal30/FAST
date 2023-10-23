@@ -1,7 +1,7 @@
 # the server script for the admin side of FASTphysics
 # an app that inputs entries through streamlit forms and prints the entries
 import sys, re, os
-sys.path.append("../")
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from utils import info
 
 import firestore as fs
