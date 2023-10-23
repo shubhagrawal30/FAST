@@ -37,6 +37,24 @@ def set_to_button_click(db, button_doc_name):
                 firstp_field_name: st.session_state.firstp})
     except:
         print(f"Error in setting to {button_doc_name}.")
+        
+def set_to_default_click(db):
+    fs.update_doc_dict(db, collection_name, document_name, \
+        {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
+            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
+    st.session_state.subject = DEFAULT_SUBJECT
+    st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
+    st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
+
+def update_text_area(fn, db, collection_name, document_name):
+    st.session_state[fn] = st.session_state[f"{fn}-box"]
+    doc = fs.get_doc(db, collection_name, document_name)
+    if doc.exists:
+        fs.update_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject, \
+            initp_field_name: st.session_state.initp, firstp_field_name: st.session_state.firstp})
+    else:
+        fs.set_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject, \
+            initp_field_name: st.session_state.initp, firstp_field_name: st.session_state.firstp})
 
 def add_logo_and_credits():
     st.markdown("----")
@@ -64,13 +82,13 @@ def print_setting(text):
 def add_current_settings():
     # show current settings
     colored_header("Current settings:", description="", color_name="violet-70")
-    for hd, md in zip(["Subject:", "Instructions:", "First Student Input:"], \
+    for hd, fn in zip(["Subject:", "Instructions:", "First Student Input:"], \
                         ["subject", "initp", "firstp"]):
         st.subheader(hd)
-        text, read_more = print_setting(st.session_state[md])
+        text, read_more = print_setting(st.session_state[fn])
         if read_more:
             st.markdown(text + "...")
-            st.expander(":blue[Read More]", expanded=False).markdown(st.session_state[md])
+            st.expander(":blue[Read More]", expanded=False).markdown(st.session_state[fn])
         else:
             st.markdown(text)
 
@@ -105,30 +123,13 @@ if __name__ == "__main__":
                 on_click=set_to_button_click, args=(db, button_doc_name))
             
         # a reset-to-default button
-        if st.button("Reset to Default", type="secondary", use_container_width=True):
-            fs.update_doc_dict(db, collection_name, document_name, \
-                {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
-                    firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
-            st.session_state.subject = DEFAULT_SUBJECT
-            st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
-            st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
+        st.button("Reset to Default", type="secondary", use_container_width=True, \
+            on_click=set_to_default_click, args=(db,))
 
-        # entry box for the subject
-        subject = st.text_input("Subject", st.session_state.subject, key="subject-box")
-        # entry box for the initialization prompt, box is multiline and bigger
-        initp = st.text_area("Prompt", st.session_state.initp, height=200, key="initp-box")
-        # entry box for the first prompt, box is multiline and bigger
-        firstp = st.text_area("First Student Input", st.session_state.firstp, height=200, key="firstp-box")
+        # make entry boxes for the settings
+        for text, fn, ht in zip(["Subject:", "Instructions:", "First Student Input:"], \
+                            ["subject", "initp", "firstp"], [3, 200, 200]):
+            st.text_area(text, st.session_state[fn], height=ht, key=f"{fn}-box", \
+                on_change=update_text_area, args=(fn, db, collection_name, document_name))
     
-    # set up the inputs in the database
-    doc = fs.get_doc(db, collection_name, document_name)
-    if doc.exists:
-        fs.update_doc_dict(db, collection_name, document_name, \
-            {subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
-        st.session_state.subject, st.session_state.initp, st.session_state.firstp = subject, initp, firstp
-    else:
-        fs.set_doc_dict(db, collection_name, document_name, \
-            {subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
-        st.session_state.subject, st.session_state.initp, st.session_state.firstp = subject, initp, firstp
-
     add_logo_and_credits()
