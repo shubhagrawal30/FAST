@@ -1,6 +1,6 @@
 # the server script for the admin side of FASTphysics
 # an app that inputs entries through streamlit forms and prints the entries
-import sys
+import sys, re
 sys.path.append("../")
 from utils.info import *
 
@@ -11,6 +11,7 @@ from streamlit_extras.mention import mention
 from streamlit_extras.badges import badge
 st.set_page_config(layout="wide")
 
+NUM_LINES_SETTINGS = 3
 collection_name, document_name = "prompts", "active"
 subject_field_name, initp_field_name, firstp_field_name = "subject", "init", "first"
 
@@ -51,6 +52,27 @@ def add_logo_and_credits():
     col2.caption("© 2023, S.A. for the FAST team. All rights reserved.")
     col3.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
 
+def print_setting(text):
+    if len(text) == 0:
+        return "_<currently empty>_", False
+    else:
+        sentences = re.split('[.;?!]', text)
+        idx = text.find(sentences[NUM_LINES_SETTINGS]) if len(sentences) > NUM_LINES_SETTINGS else len(text)
+        return text[:idx], idx < len(text)
+
+def add_current_settings():
+    # show current settings
+    colored_header("Current settings:", description="", color_name="violet-70")
+    for hd, md in zip(["Subject:", "Instructions:", "First Student Input:"], \
+                        ["subject", "initp", "firstp"]):
+        st.subheader(hd)
+        text, read_more = print_setting(st.session_state[md])
+        if read_more:
+            st.markdown(text + "...")
+            st.expander(":blue[Read More]", expanded=False).markdown(st.session_state[md])
+        else:
+            st.markdown(text)
+
 if __name__ == "__main__":
     db = fs.get_database()
 
@@ -71,14 +93,7 @@ if __name__ == "__main__":
     col1, col2 = st.columns(2)
     
     with col1:
-        # show current settings
-        colored_header("Current settings:", description="", color_name="blue-70")
-        st.subheader("Subject:")
-        st.markdown(st.session_state.subject if len(st.session_state.subject) > 0 else "_<currently empty>_")
-        st.subheader("Instructions:")
-        st.markdown(st.session_state.initp if len(st.session_state.initp) > 0 else "_<currently empty>_")
-        st.subheader("First Student Input:")
-        st.markdown(st.session_state.firstp if len(st.session_state.firstp) > 0 else "_<currently empty>_")
+        add_current_settings()
         
     with col2:
         button_cols = col2.columns(3)

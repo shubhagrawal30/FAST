@@ -2,6 +2,8 @@ import sys, time
 sys.path.append("../")
 import streamlit as st
 from streamlit_extras.colored_header import colored_header
+st.set_page_config(layout="wide")
+
 from tutor import tutor
 from utils.info import *
 
@@ -15,7 +17,7 @@ class Interface:
         sb = st.sidebar
         sb.title("Friendly Awesome Smart Tutor")
         with sb:
-            colored_header("Here to help with:", description=f"{self.tutor.subject}", color_name="blue-70")
+            colored_header("Here to help with:", description=f"{self.tutor.subject}", color_name="violet-70")
         
         # add Penn logo and credits
         sb.markdown("----")
