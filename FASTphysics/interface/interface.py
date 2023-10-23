@@ -1,19 +1,35 @@
 import sys, time
 sys.path.append("../")
 import streamlit as st
+from streamlit_extras.colored_header import colored_header
 from tutor import tutor
+from utils.info import *
 
 class Interface:
     def __init__(self, tu: tutor) -> None:
         self.tutor = tu
         if "messages" not in st.session_state:
             st.session_state.messages = []
+            
+    def sidebar(self):
+        sb = st.sidebar
+        sb.title("Friendly Awesome Smart Tutor")
+        with sb:
+            colored_header("Here to help with:", description=f"{self.tutor.subject}", color_name="blue-70")
+        
+        # add Penn logo and credits
+        sb.markdown("----")
+        sb.markdown("----")
+        sb.image("./assets/penn_logo.png", width=250)
+        sb.caption(f"Student Page @ [{student_page_url.split('//')[1]}](%s)" % student_page_url)
+        sb.caption("© 2023, S.A. for the FAST team. All rights reserved.")
+        sb.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
 
     def memory(self):
         st.title(f"Welcome to FAST{self.tutor.subject}!")
         for message in st.session_state.messages:
-                    with st.chat_message(message["role"]):
-                        st.markdown(message["content"])
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
     def stream(self, prompt):
         full_response = ""
@@ -27,12 +43,13 @@ class Interface:
         st.session_state.messages.append({"role": "assistant", "content": full_response})
 
     def prompt(self):
-        if prompt := st.chat_input("What is up?"):
+        if prompt := st.chat_input("Say Hello! to your Friendly Awesome Smart Tutor!"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
             self.stream(prompt)
             
     def main(self):
+        self.sidebar()
         self.memory()
         self.prompt()

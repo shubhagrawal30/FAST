@@ -1,7 +1,15 @@
 # the server script for the admin side of FASTphysics
 # an app that inputs entries through streamlit forms and prints the entries
+import sys
+sys.path.append("../")
+from utils.info import *
+
 import firestore as fs
 import streamlit as st
+from streamlit_extras.colored_header import colored_header
+from streamlit_extras.mention import mention
+from streamlit_extras.badges import badge
+st.set_page_config(layout="wide")
 
 collection_name, document_name = "prompts", "active"
 subject_field_name, initp_field_name, firstp_field_name = "subject", "init", "first"
@@ -13,7 +21,7 @@ DEFAULT_FIRSTP = lambda subject: \
     f"Hey there, my tutor for {subject}! I am the student and here to learn more about {subject}!"
 
 # list of buttons that admin can set values to
-set_to_buttons_doc_names = ["astro-demo", "physics-demo"]
+set_to_buttons_doc_names = ["astro-demo", "physics-demo", "eco-demo"]
 button_text_field_name = "button_text"
 
 def set_to_button_click(db, button_doc_name):
@@ -29,6 +37,20 @@ def set_to_button_click(db, button_doc_name):
     except:
         print(f"Error in setting to {button_doc_name}.")
 
+def add_logo_and_credits():
+    st.markdown("----")
+    st.markdown("----")
+    # add Penn logo and credits
+    _, col, _, bcol = st.columns([4, 1, 2, 3])
+    col.image("../assets/penn_logo.png", width=250)
+    with bcol:
+        badge("github", "shubhagrawal30/FASTphysics")
+        mention("shubhagrawal30/FASTphysics", icon="github", url="https://github.com/shubhagrawal30/FASTphysics")
+    _, col1, col2, col3, _ = st.columns([2, 5, 5, 5, 1])
+    col1.caption(f"Student Page @ [{student_page_url.split('//')[1]}](%s)" % student_page_url)
+    col2.caption("© 2023, S.A. for the FAST team. All rights reserved.")
+    col3.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
+
 if __name__ == "__main__":
     db = fs.get_database()
 
@@ -43,38 +65,44 @@ if __name__ == "__main__":
         st.session_state.initp = DEFAULT_INITP(st.session_state.subject)
         st.session_state.firstp = DEFAULT_FIRSTP(st.session_state.subject)
     
-    st.title("FAST Admin")
+    st.title("Control Panel for the Friendly Awesome Smart Tutor!")
     st.text("Remember to reload the student page after reconfiguration.")
+    st.empty()
+    col1, col2 = st.columns(2)
     
-    # show current settings
-    st.header("Current settings:")
-    st.subheader("Subject:")
-    st.write(st.session_state.subject)
-    st.subheader("Instructions:")
-    st.write(st.session_state.initp)
-    st.subheader("First Student Input:")
-    st.write(st.session_state.firstp)
+    with col1:
+        # show current settings
+        colored_header("Current settings:", description="", color_name="blue-70")
+        st.subheader("Subject:")
+        st.markdown(st.session_state.subject if len(st.session_state.subject) > 0 else "_<currently empty>_")
+        st.subheader("Instructions:")
+        st.markdown(st.session_state.initp if len(st.session_state.initp) > 0 else "_<currently empty>_")
+        st.subheader("First Student Input:")
+        st.markdown(st.session_state.firstp if len(st.session_state.firstp) > 0 else "_<currently empty>_")
         
-    # several buttons that set the values to some preset values
-    for button_doc_name in set_to_buttons_doc_names:
-        button_text = fs.get_doc(db, collection_name, button_doc_name).get(button_text_field_name)
-        st.button(f"Set to {button_text}", on_click=set_to_button_click, args=(db, button_doc_name))
-        
-    # a reset-to-default button
-    if st.button("Reset to Default"):
-        fs.update_doc_dict(db, collection_name, document_name, \
-            {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
-                firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
-        st.session_state.subject = DEFAULT_SUBJECT
-        st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
-        st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
+    with col2:
+        button_cols = col2.columns(3)
+        # several buttons that set the values to some preset values
+        for ind, button_doc_name in enumerate(set_to_buttons_doc_names):
+            button_text = fs.get_doc(db, collection_name, button_doc_name).get(button_text_field_name)
+            button_cols[ind % len(button_cols)].button(button_text, type="primary", use_container_width=True, \
+                on_click=set_to_button_click, args=(db, button_doc_name))
+            
+        # a reset-to-default button
+        if st.button("Reset to Default", type="secondary", use_container_width=True):
+            fs.update_doc_dict(db, collection_name, document_name, \
+                {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
+                    firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
+            st.session_state.subject = DEFAULT_SUBJECT
+            st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
+            st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
 
-    # entry box for the subject
-    subject = st.text_input("Subject", st.session_state.subject, key="subject-box")
-    # entry box for the initialization prompt, box is multiline and bigger
-    initp = st.text_area("Prompt", st.session_state.initp, height=200, key="initp-box")
-    # entry box for the first prompt, box is multiline and bigger
-    firstp = st.text_area("First Student Input", st.session_state.firstp, height=200, key="firstp-box")
+        # entry box for the subject
+        subject = st.text_input("Subject", st.session_state.subject, key="subject-box")
+        # entry box for the initialization prompt, box is multiline and bigger
+        initp = st.text_area("Prompt", st.session_state.initp, height=200, key="initp-box")
+        # entry box for the first prompt, box is multiline and bigger
+        firstp = st.text_area("First Student Input", st.session_state.firstp, height=200, key="firstp-box")
     
     # set up the inputs in the database
     doc = fs.get_doc(db, collection_name, document_name)
@@ -86,3 +114,5 @@ if __name__ == "__main__":
         fs.set_doc_dict(db, collection_name, document_name, \
             {subject_field_name: subject, initp_field_name: initp, firstp_field_name: firstp})
         st.session_state.subject, st.session_state.initp, st.session_state.firstp = subject, initp, firstp
+
+    add_logo_and_credits()
