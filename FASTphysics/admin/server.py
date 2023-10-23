@@ -2,7 +2,7 @@
 # an app that inputs entries through streamlit forms and prints the entries
 import sys, re, os
 sys.path.append("../")
-from utils.info import *
+from utils import info
 
 import firestore as fs
 import streamlit as st
@@ -49,7 +49,7 @@ def add_logo_and_credits():
         badge("github", "shubhagrawal30/FASTphysics")
         mention("shubhagrawal30/FASTphysics", icon="github", url="https://github.com/shubhagrawal30/FASTphysics")
     _, col1, col2, col3, _ = st.columns([2, 5, 5, 5, 1])
-    col1.caption(f"Student Page @ [{student_page_url.split('//')[1]}](%s)" % student_page_url)
+    col1.caption(f"Student Page @ [{info.student_page_url.split('//')[1]}](%s)" % info.student_page_url)
     col2.caption("© 2023, S.A. for the FAST team. All rights reserved.")
     col3.caption("Contact [Shubh Agrawal](%s) for comments." % "mailto:shubh@sas.upenn.edu")
 
