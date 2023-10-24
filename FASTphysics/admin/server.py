@@ -81,7 +81,7 @@ def print_setting(text):
 
 def add_current_settings():
     # show current settings
-    colored_header("Current settings:", description="", color_name="violet-70")
+    colored_header("Current settings:", description="", color_name="blue-70")
     for hd, fn in zip(["Subject:", "Instructions:", "First Student Input:"], \
                         ["subject", "initp", "firstp"]):
         st.subheader(hd)

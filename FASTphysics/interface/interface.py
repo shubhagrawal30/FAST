@@ -17,7 +17,8 @@ class Interface:
         sb = st.sidebar
         sb.title("Friendly Awesome Smart Tutor")
         with sb:
-            colored_header("Here to help with:", description=f"{self.tutor.subject}", color_name="violet-70")
+            colored_header("Here to help with:", description="", color_name="blue-70")
+        sb.markdown(f"_{self.tutor.subject}_")
         
         # add Penn logo and credits
         sb.markdown("----")
