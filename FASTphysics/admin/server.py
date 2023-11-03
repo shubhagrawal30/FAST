@@ -11,6 +11,9 @@ from streamlit_extras.mention import mention
 from streamlit_extras.badges import badge
 st.set_page_config(layout="wide")
 
+# we use the convention that st.session_state strings are correctly formatted,
+# while Firestore strings are lists of lines (that is we use '\n'.join and .split('\n') while reading and writing)
+
 NUM_LINES_SETTINGS = 3
 collection_name, document_name = "prompts", "active"
 subject_field_name, initp_field_name, firstp_field_name = "subject", "init", "first"
@@ -28,20 +31,21 @@ button_text_field_name = "button_text"
 def set_to_button_click(db, button_doc_name):
     try:
         doc = fs.get_doc(db, collection_name, button_doc_name)
-        st.session_state.subject = doc.get(subject_field_name)
-        st.session_state.initp = doc.get(initp_field_name)
-        st.session_state.firstp = doc.get(firstp_field_name)
+        st.session_state.subject = '\n'.join(doc.get(subject_field_name))
+        st.session_state.initp = '\n'.join(doc.get(initp_field_name))
+        st.session_state.firstp = '\n'.join(doc.get(firstp_field_name))
         # update active document
         fs.update_doc_dict(db, collection_name, document_name, \
-            {subject_field_name: st.session_state.subject, initp_field_name: st.session_state.initp, \
-                firstp_field_name: st.session_state.firstp})
+            {subject_field_name: st.session_state.subject.split('\n'), \
+                initp_field_name: st.session_state.initp.split('\n'), \
+                firstp_field_name: st.session_state.firstp.split('\n')})
     except:
         print(f"Error in setting to {button_doc_name}.")
         
 def set_to_default_click(db):
     fs.update_doc_dict(db, collection_name, document_name, \
-        {subject_field_name: DEFAULT_SUBJECT, initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT), \
-            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT)})
+        {subject_field_name: DEFAULT_SUBJECT.split('\n'), initp_field_name: DEFAULT_INITP(DEFAULT_SUBJECT).split('\n'), \
+            firstp_field_name: DEFAULT_FIRSTP(DEFAULT_SUBJECT).split('\n')})
     st.session_state.subject = DEFAULT_SUBJECT
     st.session_state.initp = DEFAULT_INITP(DEFAULT_SUBJECT)
     st.session_state.firstp = DEFAULT_FIRSTP(DEFAULT_SUBJECT)
@@ -50,11 +54,11 @@ def update_text_area(fn, db, collection_name, document_name):
     st.session_state[fn] = st.session_state[f"{fn}-box"]
     doc = fs.get_doc(db, collection_name, document_name)
     if doc.exists:
-        fs.update_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject, \
-            initp_field_name: st.session_state.initp, firstp_field_name: st.session_state.firstp})
+        fs.update_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject.split("\n"), \
+            initp_field_name: st.session_state.initp.split("\n"), firstp_field_name: st.session_state.firstp.split("\n")})
     else:
-        fs.set_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject, \
-            initp_field_name: st.session_state.initp, firstp_field_name: st.session_state.firstp})
+        fs.set_doc_dict(db, collection_name, document_name, {subject_field_name: st.session_state.subject.split("\n"), \
+            initp_field_name: st.session_state.initp.split("\n"), firstp_field_name: st.session_state.firstp.split("\n")})
 
 def add_logo_and_credits():
     st.markdown("----")
@@ -77,7 +81,7 @@ def print_setting(text):
     else:
         sentences = re.split('[.;?!]', text)
         idx = text.find(sentences[NUM_LINES_SETTINGS]) if len(sentences) > NUM_LINES_SETTINGS else len(text)
-        return text[:idx], idx < len(text)
+        return text[:idx].replace('\n', '\n\n'), idx < len(text)
 
 def add_current_settings():
     # show current settings
@@ -88,9 +92,15 @@ def add_current_settings():
         text, read_more = print_setting(st.session_state[fn])
         if read_more:
             st.markdown(text + "...")
-            st.expander(":blue[Read More]", expanded=False).markdown(st.session_state[fn])
+            st.expander(":blue[Read More]", expanded=False).markdown(st.session_state[fn].replace('\n', '\n\n'))
         else:
             st.markdown(text)
+            
+def copy_current_to_demo(db, button_doc_name):
+    fs.update_doc_dict(db, collection_name, button_doc_name, \
+        {subject_field_name: st.session_state.subject.split("\n"), \
+            initp_field_name: st.session_state.initp.split("\n"), \
+            firstp_field_name: st.session_state.firstp.split("\n")})
 
 if __name__ == "__main__":
     db = fs.get_database()
@@ -98,9 +108,9 @@ if __name__ == "__main__":
     # load current values from the database
     doc = fs.get_doc(db, collection_name, document_name)
     try:
-        st.session_state.subject = doc.get(subject_field_name)
-        st.session_state.initp = doc.get(initp_field_name)
-        st.session_state.firstp = doc.get(firstp_field_name)
+        st.session_state.subject = '\n'.join(doc.get(subject_field_name))
+        st.session_state.initp = '\n'.join(doc.get(initp_field_name))
+        st.session_state.firstp = '\n'.join(doc.get(firstp_field_name))
     except:
         st.session_state.subject = DEFAULT_SUBJECT
         st.session_state.initp = DEFAULT_INITP(st.session_state.subject)
