@@ -24,18 +24,18 @@ class Prompts:
         
     def SUBJECT(self):
         try:
-            return self.doc.get("subject")
+            return '\n'.join(self.doc.get("subject"))
         except:
             return DEFAULT_SUBJECT
     
     def INIT_PROMPT(self):
         try:
-            return self.doc.get("init")
+            return '\n'.join(self.doc.get("init"))
         except:
             return DEFAULT_INITP(self.SUBJECT())
     
     def FIRST_PROMPT(self):
         try:
-            return self.doc.get("first")
+            return '\n'.join(self.doc.get("first"))
         except:
             return DEFAULT_FIRSTP(self.SUBJECT())
