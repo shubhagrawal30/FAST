@@ -18,7 +18,7 @@ class Tutor():
         response = client.chat.completions.create(model="gpt-4", messages=self.history, stream=True)
         collect_msgs = ""
         for chunk in response:
-            msg = chunk['choices'][0]['delta'].get('content', '')
+            msg = chunk.choices[0].delta.content or ""
             collect_msgs += msg
             yield msg
         
