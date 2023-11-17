@@ -1,9 +1,9 @@
-import openai
+from openai import OpenAI
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 import os, sys
 import streamlit as st
 from . import prompts
-
-openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 class Tutor():
     def __init__(self):
@@ -15,11 +15,7 @@ class Tutor():
     def ask(self, question): # method is a generator method to allow streaming OpenAI responses
         question = {"role": "user", "content": question}
         self.history.append(question)
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=self.history,
-            stream=True
-        )
+        response = client.chat.completions.create(model="gpt-4", messages=self.history, stream=True)
         collect_msgs = ""
         for chunk in response:
             msg = chunk['choices'][0]['delta'].get('content', '')
