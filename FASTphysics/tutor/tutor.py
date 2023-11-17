@@ -1,9 +1,9 @@
 from openai import OpenAI
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
 import os, sys
 import streamlit as st
 from . import prompts
+
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 class Tutor():
     def __init__(self):
